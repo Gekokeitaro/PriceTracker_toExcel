@@ -1,0 +1,9 @@
+# Ignorar carpetas generadas por Spyder
+.spyproject/
+.ipynb_checkpoints/
+
+# Ignorar todos los logs de Selenium
+*.log
+
+# Ignorar la carpeta Products_JSONs y su contenido
+Products_JSONs/
