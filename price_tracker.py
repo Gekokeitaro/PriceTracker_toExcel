@@ -12,6 +12,7 @@ import json
 
 import time
 from selenium import webdriver
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -36,12 +37,12 @@ def getWebHtml(driver, product_url : str, actions=[]) -> str:
     driver.get(product_url)
     
     #Esperamos 30 segundos hasta que aparezca el botón de cookies y al aparecer hace clic
-    if 'click_cookies' in actions:
-        accept_cookies = WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.ID, 'cookiesAcceptAll'))
-        )     
+    #if 'click_cookies' in actions:
+     #   accept_cookies = WebDriverWait(driver, 30).until(
+      #      EC.presence_of_element_located((By.ID, actions['click_cookies']))
+       # )     
         
-        accept_cookies.click()
+        #accept_cookies.click()
         
     #Descargamos el HTML
     html = driver.page_source
@@ -51,12 +52,18 @@ def getWebHtml(driver, product_url : str, actions=[]) -> str:
     else :
         print(f"Failed to fetch content from {product_url}:")
         return None
+    
+def priceToInt(priceStr : str) -> int:
+    priceTmp = priceStr.strip().replace("€", "").replace(",",".")
+    
+    return int(float(priceTmp)) if len(priceTmp.rsplit(".")[0]) > 2 else int(float(".".join(priceTmp.rsplit(".")[:-1])))
+    
 
 def main() -> None:
     # Selenium
     options = Options()
     options.headless = True
-    driver = webdriver.Firefox(options=options)
+    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install() ,options=options)
 
     try:
         product_lst = [file for file in os.listdir(PRODUCTS_JSONS) if file.endswith('.json') and not file.startswith('NO_')]
@@ -76,12 +83,13 @@ def main() -> None:
             
                 search_params = dict(product_data['find'])
                 price = soup.find(search_params['tag'], attrs=search_params['attr'])
-                
+                 
+                # Si el valor del precio se encuentra en una propiedad HTML...
                 if 'property_w_value' in product_data:
                     html_property = product_data['property_w_value']
-                    print(f"{float(price[html_property]):.2f}")
+                    print(f"{int(float(price[html_property].strip()))}")
                 else:
-                    print(price.text.strip())
+                    print(priceToInt(price.text))
                     
                     #print(f"{float(price['content']):.2f}")
     finally:
