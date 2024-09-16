@@ -10,6 +10,7 @@ import requests as r
 import os
 import json
 
+import proxy_rotator
 import time
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
@@ -66,32 +67,37 @@ def main() -> None:
     driver = webdriver.Firefox(executable_path=GeckoDriverManager().install() ,options=options)
 
     try:
-        product_lst = [file for file in os.listdir(PRODUCTS_JSONS) if file.endswith('.json') and not file.startswith('NO_')]
+        
+        proxy_rotator.obtener_proxies_por_region()
+        # product_lst = [file for file in os.listdir(PRODUCTS_JSONS) if file.endswith('.json') and not file.startswith('NO_')]
     
-        for product_dict in product_lst:
+        # for product_dict in product_lst:
             
-            product_data = read_json(os.path.join(PRODUCTS_JSONS, product_dict))
-            base_url = product_data['base_url']
-            base_suffix = product_data['suffix'] if 'suffix' in product_data else None
+        #     product_data = read_json(os.path.join(PRODUCTS_JSONS, product_dict))
+        #     base_url = product_data['base_url']
+        #     base_suffix = product_data['suffix'] if 'suffix' in product_data else None
             
-            for product in product_data['products']:
+        #     for product in product_data['products']:
     
-                product_url = '/'.join([base_url, base_suffix, product]) if base_suffix else '/'.join([base_url, product])
-                soup = getWebHtml(driver, product_url, product_data['actions'])
+        #         product_url = '/'.join([base_url, base_suffix, product]) if base_suffix else '/'.join([base_url, product])
+        #         soup = getWebHtml(driver, product_url, product_data['actions'])
                 
-                if not soup: continue
+        #         if not soup: continue
             
-                search_params = dict(product_data['find'])
-                price = soup.find(search_params['tag'], attrs=search_params['attr'])
+        #         search_params = dict(product_data['find'])
+        #         for attr in search_params['attr']:
+        #             price = soup.find(search_params['tag'], attrs=attr)
+        #             if price != None: break
                  
-                # Si el valor del precio se encuentra en una propiedad HTML...
-                if 'property_w_value' in product_data:
-                    html_property = product_data['property_w_value']
-                    print(f"{int(float(price[html_property].strip()))}")
-                else:
-                    print(priceToInt(price.text))
+        #         # Si el valor del precio se encuentra en una propiedad HTML...
+        #         if 'property_w_value' in product_data:
+        #             html_property = product_data['property_w_value']
+        #             print(f"{int(float(price[html_property].strip()))}")
+        #         else:
+        #             print(price)
+        #             print(priceToInt(price.text))
                     
-                    #print(f"{float(price['content']):.2f}")
+        #             #print(f"{float(price['content']):.2f}")
     finally:
        driver.quit()
 
